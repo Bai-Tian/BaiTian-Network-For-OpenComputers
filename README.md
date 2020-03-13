@@ -2,7 +2,8 @@
 一个基于Minecraft opencomputers mod可以裸机运行的DNS服务器
 
 ## 客户端调用函数
-function dns(d) component.modem.open(53) component.modem.broadcast(53,"dns",d) i=0 repeat i=i+1 a={event.pull(0.05,"modem")} until (a[1]=="modem_message" and (a[6]=="succeeded" or a[6]=="not found")) or i>4 return a[7],a[6] end  
+function dns(d) component.modem.open(53) component.modem.broadcast(53,"dns",d) i=0 repeat i=i+1 a={event.pull(0.05,"modem")} until (a[1]=="modem_message" and (a[6]=="succeeded" or a[6]=="not found")) or i>3 return a[7],a[6] end  
+  
 用法：dns(要解析的域名) 返回：目标网卡地址，成功"succeeded"/失败"not found" 
 
 ## API
