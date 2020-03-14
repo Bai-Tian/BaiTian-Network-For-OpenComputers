@@ -1,6 +1,7 @@
 servername = "tb"
-swm= nil
+
 ----------白天网络服务器 by Bai_Tian----------
+swm= nil
 ctrl = "0"
 K = {}
 K.fs = component.proxy(computer.getBootAddress())
