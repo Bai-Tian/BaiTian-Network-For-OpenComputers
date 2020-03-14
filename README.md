@@ -1,6 +1,7 @@
 # BaiTian-Network-For-OpenComputers
 一个基于Minecraft opencomputers mod可以裸机运行的DNS服务器
 
+## 注意！本程序只能在无法伪造发信者地址的情况下才可安全使用
 ## 客户端调用函数
 function dns(d) component.modem.open(53) component.modem.broadcast(53,"dns",d) i=0 repeat i=i+1 a={event.pull(0.05,"modem")} until (a[1]=="modem_message" and (a[6]=="succeeded" or a[6]=="not found")) or i>3 return a[7],a[6] end  
   
