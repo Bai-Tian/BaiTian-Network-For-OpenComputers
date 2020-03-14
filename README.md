@@ -27,7 +27,7 @@ function dns(d) component.modem.open(53) component.modem.broadcast(53,"dns",d) i
 返回： 如果查询成功，第6个值为一个包含所有域名和地址字符串  
 
 3.设定开机字符串：  
-发送： modem.broadcast(53,"dns_setawake",要操作的域名后缀对应的服务器)  
+发送： modem.broadcast(53,"dns_setawake",要操作的域名后缀对应的服务器,要设置的字符串)  
 返回： 如果设置成功，第6个值为"setwakemessage"，失败为"setwakemessage failed"  
 
 4.关机：  
