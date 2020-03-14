@@ -1,15 +1,11 @@
-ctrl = "0"
 servername = "tb"
 swm= nil
-------------------------------------
-
+----------白天网络服务器 by Bai_Tian----------
+ctrl = "0"
 K = {}
 K.fs = component.proxy(computer.getBootAddress())
 modem = component.proxy(component.list("modem")())
 
---gpu = component.proxy(component.list("gpu")())
-
-if swm then modem.setWakeMessage("BaitianNetworkServer"..servername) end
 -------------文件读写IO-------------
 function K.write(n, str) -- 写入文件 "w"删除内容 "a"不删除
     local h = K.fs.open(n, "w")
@@ -54,10 +50,10 @@ function K.tabletostring(ta, taname)
         for k, v in pairs(ta) do
             if type(v) ~= "table" then
                 if type(v) == "string" then
-                    result = result .. taname .. "." .. k .. "=" .. "\"" .. v ..
+                    result = result .. taname .. "[\"" .. k .. "\"]=" .. "\"" .. v ..
                                  "\"" .. "\n"
                 else
-                    result = result .. taname .. "." .. k .. "=" .. v .. "\n"
+                    result = result .. taname .. "[\"" .. k .. "\"]=" .. v .. "\n"
                 end
             else
                 k = taname .. "." .. k
@@ -103,28 +99,70 @@ function dns_r()
     end
 end
 
+function dns_l()
+	modem.send(ctrl,53,K.read("/config.lua"))
+end
+
+function dns_sa()
+	if swm then
+		modem.setWakeMessage(swm)
+		modem.send(ctrl,53,"setwakemessage")
+	else
+		modem.send(ctrl,53,"setwakemessage failed")
+	end
+end
+
+function dns_st()
+	modem.send(ctrl,53,"shutdown")
+	computer.shutdown()
+end
+
+function dns_e()
+if not _CFG[domainpre] then
+        _CFG[domainpre] =from
+        modem.send(from,53,"created")
+        K.configrewrite()
+	else
+    _CFG[domainpre] =from
+    modem.send(from,53,"edited")
+    K.configrewrite()
+	end
+end
+
 function domainverification(a)
     domainsu=nil
     domainpre=nil
-    domaintable = K.stringsplit(domain, ".")
+	domaintable={}
+    if domain then domaintable = K.stringsplit(domain, ".") end
     domainsu = domaintable[#domaintable]
     domainpre = domaintable[#domaintable-1]
     if domainpre and domainsu==servername and a==0 then dns() end
     if domainpre and domainsu==servername and a==1 then dns_r() end
+	if domain==servername and a==10 then dns_l() end
+	if domain==servername and a==11 then dns_sa() end
+	if domain==servername and a==12 then dns_st() end
+	if domainpre and domainsu==servername and a==13 then dns_e() end
 end
 
 function pull()
     data=nil from=nil cmd=nil domain=nil
     data = {computer.pullSignal(1)}
+	if not data then data = {} end
     if data[4] == 53 and data[1] == "modem_message" then
         from=data[3]
         cmd=data[6]
+		domain=data[7]
         if cmd=="dns" then
-            domain=data[7]
             domainverification(0)
         elseif cmd=="dns_register" then
-            domain=data[7]
-            domainverification(1)
+			if from==ctrl then domainverification(13) else domainverification(1) end
+		elseif cmd=="dns_list" and from==ctrl then
+			domainverification(10)
+		elseif cmd=="dns_setawake" and from==ctrl then
+			swm=data[8]
+			domainverification(11)
+		elseif cmd=="dns_shutdown" and from==ctrl then
+			domainverification(12)
         elseif cmd=="relay" then
             
         end
@@ -134,5 +172,6 @@ end
 
 modem.open(53)
 while true do
+	if _CFG["CTRL"] then ctrl=_CFG["CTRL"] end
     pull()
 end
