@@ -18,11 +18,11 @@ local Foreground = 0x00FF00
 if not BaitianLib then BaitianLib = {} end
 BaitianLib.fs = component.proxy(computer.getBootAddress())
 
-if BaitianLib.fs.exists("baitian_tmodem.lua") then
-    dofile("/" .. "baitian_tmodem.lua")
-else
-    print("網卡庫文件 <baitian_tmodem.lua> 不存在")
-end
+-- if BaitianLib.fs.exists("baitian_tmodem.lua") then
+    -- dofile("/" .. "baitian_tmodem.lua")
+-- else
+    -- print("網卡庫文件 <baitian_tmodem.lua> 不存在")
+-- end
 
 function BaitianLib.write(n, str)
     local h = BaitianLib.fs.open(n, "w")
