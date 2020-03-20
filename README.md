@@ -1,41 +1,30 @@
 # BaiTian-Network-For-OpenComputers
-一个基于Minecraft opencomputers mod可以裸机运行的DNS服务器
+一个基于Minecraft opencomputers mod的网络系统
 
-## 注意！本程序只能在无法伪造发信者地址的情况下才可安全使用
-## 客户端调用函数
-function dns(d) component.modem.open(53) component.modem.broadcast(53,"dns",d) i=0 repeat i=i+1 a={event.pull(0.05,"modem")} until (a[1]=="modem_message" and (a[6]=="succeeded" or a[6]=="not found")) or i>3 return a[7],a[6] end  
-  
-用法：dns(要解析的域名) 返回：目标网卡地址，成功"succeeded"/失败"not found" 
+## 客户端函数库使用方法：  
+1.下载baitian_modem.lua放进lib文件夹内  
+2.下载SERVERSADDR.lua放进根目录内
+3.在代码里require("baitian_modem")或者在运行代码前运行一遍baitian_modem.lua
 
-提示：如果已知dns服务器网卡地址，以下代码中的broadcast可换成send
-## API
-客户端使用前不要忘记先打开53号端口接受信息 modem.open(53)  
-1.解析域名：  
-发送： modem.broadcast(53,"dns",要解析的域名)   
-返回： 如果查询成功，第6个值为"succeeded"，第7个值为查询到的网卡地址。如果失败，则返回"not found"  
-  
-1.注册域名：  
-发送： modem.broadcast(53,"dns_register",要注册的域名)   
-返回： 如果注册成功，第6个值为"created"。如果已经用此网卡注册过，则返回"edited"。如果此网卡注册的域名已经被其他网卡注册过，则返回"failed"  
+## 新增的函数： 
+1.baitian_modem.dns(域名)
+返回：如果连接上服务器，第一个值为"succeeded"，第二个值为查询到的地址，或者第一个值为"not found"，第二个值为nil  
+如果在本次开机后已经查询过同样的域名，则第一个值为"from the cache"，第二个值为查询到的地址  
+如果网络连接出现错误，则第一个值为"connection failed"，第二个值为nil  
 
-## 管理员命令
-1.注册或强制修改域名：  
-发送： modem.broadcast(53,"dns_register",要注册或强制修改的域名)   
-返回： 如果修改成功，第6个值为"edited"  
+2.baitian_modem.dnsp(域名)
+和上一个函数一个功能，只不过这个函数每次执行都会连接DNS服务器，不会从缓存中查找  
 
-2.返回所有注册过的域名：  
-发送： modem.broadcast(53,"dns_list",要操作的域名后缀对应的服务器)  
-返回： 如果查询成功，第6个值为一个包含所有域名和地址字符串  
+3.baitian_modem.dns_register(域名)
+返回： 如果注册成功，第6个值为"created"。如果已经用此网卡注册过，则返回"edited"。如果此网卡注册的域名已经被其他网卡注册过，则返回"failed"
+如果网络连接出现错误，则返回值为nil  
 
-3.设定开机字符串：  
-发送： modem.broadcast(53,"dns_setawake",要操作的域名后缀对应的服务器,要设置的字符串)  
-返回： 如果设置成功，第6个值为"setwakemessage"，失败为"setwakemessage failed"  
-
-4.关机：  
-发送： modem.broadcast(53,"dns_shutdown",要操作的域名后缀对应的服务器)  
-返回： 如果操作成功，第6个值为"shutdown"  
-
-## 架设须知
-首先找一个空的管理模式的硬盘把init.lua导入进去  
-代码第一行要先配置好 servername ：域名后缀，所有使用这个后缀的域名都由此服务器负责  
-服务器启动后先用控制的电脑注册"CRTL.域名后缀"这个域名，以后此电脑就为服务器的管理员，可以执行管理员命令。注意架设后必须先注册好，否则被他人抢注后果自负。
+## 修改原有的函数：
+发送：
+component.modem.broadcast()
+component.modem.send()
+接收：
+event.listen()
+event.pull()
+使用方法和原版相同，不过上面所有的函数都是用来支持中继服务器存在的。  
+如果不想使用中继服务器，请在函数名前加"old."，例如"old.component.modem.broadcast"使用原来函数的功能。
